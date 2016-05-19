@@ -9,7 +9,6 @@ import java.util.Map;
 import static spark.Spark.*;
 public class Server {
     public static void main(String[] args) {
-//        port(80);
         Gson gson = new Gson();
         Metrics metrics = new Metrics();
         Map<String,String> cpu=new HashMap<>();

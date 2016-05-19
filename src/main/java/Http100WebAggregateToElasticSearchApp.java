@@ -1,8 +1,8 @@
 /**
- * Created by lizuyao2010 on 5/18/16.
+ * Created by lizuyao2010 on 5/19/16.
  */
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-import io.parallec.core.FilterRegex;
+import io.parallec.core.HostsSourceType;
 import io.parallec.core.ParallecResponseHandler;
 import io.parallec.core.ParallelClient;
 import io.parallec.core.ResponseOnSingleTask;
@@ -12,49 +12,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.elasticsearch.client.Client;
-/**
- * Sample results visualized in Kibana as in:
- * http://www.parallec.io/images/screenshots/elastic-aggre-web3.png
- *
- * Assuming local elasticsearch-1.3.4  + kibana-3.1.2 running with default basic setup.
- *
- * hitting
- * http://www.parallec.io/validateInternals.html
- * http://www.jeffpei.com/validateInternals.html
- * http://www.restcommander.com/validateInternals.html
- *
- * @author Yuanteng (Jeff) Pei
- */
-public class Http3WebAgrregateToElasticSearchMinApp {
-
+public class Http100WebAggregateToElasticSearchApp {
 
     public static void main(String[] args) {
-
         ParallelClient pc = new ParallelClient();
         org.elasticsearch.node.Node node = nodeBuilder().node(); //elastic client initialize
         HashMap<String, Object> responseContext = new HashMap<String, Object>();
         responseContext.put("Client", node.client());
-
-        pc.prepareHttpGet("/validateInternals.html")
-                .setTargetHostsFromString("www.parallec.io www.jeffpei.com www.restcommander.com")
+        pc.prepareHttpGet("")
+                .setConcurrency(1000)
+                .setTargetHostsFromLineByLineText("http://www.parallec.io/userdata/sample_target_hosts_top100_old.txt",
+                        HostsSourceType.URL)
                 .setResponseContext(responseContext)
                 .execute( new ParallecResponseHandler() {
                     public void onCompleted(ResponseOnSingleTask res,
                                             Map<String, Object> responseContext) {
-                        String cpu = new FilterRegex(".*<td>CPU-Usage-Percent</td>\\s*<td>(.*?)</td>[\\s\\S]*")
-                                .filter(res.getResponseContent());
-                        String memory = new FilterRegex(".*<td>Memory-Used-KB</td>\\s*<td>(.*?)</td>[\\s\\S]*")
-                                .filter(res.getResponseContent());
                         Map<String, Object> metricMap = new HashMap<String, Object>();
-                        metricMap.put("CpuUsage", cpu); metricMap.put("MemoryUsage", memory);
+                        metricMap.put("StatusCode", res.getStatusCode().replaceAll(" ", "_"));
                         metricMap.put("LastUpdated",PcDateUtils.getNowDateTimeStrStandard());
-                        metricMap.put("NodeGroupType", "Web3");
-                        System.out.println("cpu:" + cpu + " host: " + res.getHost() );
+                        metricMap.put("NodeGroupType", "Web100");
                         Client client = (Client) responseContext.get("Client");
                         client.prepareIndex("local", "parallec", res.getHost()).setSource(metricMap).execute();
                     }
                 });
         node.close(); pc.releaseExternalResources();
     }
+
 
 }

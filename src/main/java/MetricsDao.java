@@ -14,5 +14,7 @@ public interface MetricsDao {
      * @param timestamp time of the collection of the metric
      * @throws RuntimeException or subclasses representing exceptions
      */
-    public void storeMetrics(String metrics, Timestamp timestamp);
+    public void storeMetrics(String metrics, String timestamp, String host);
+
+    public void close();
 }

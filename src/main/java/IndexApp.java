@@ -39,7 +39,7 @@ public class IndexApp {
                 "\"message\":\"trying out Elasticsearch version 2\"" +
                 "}";
 
-        IndexResponse response = client.prepareIndex("twitter", "tweet")
+        IndexResponse response = client.prepareIndex("twitter", "tweet","1")
                 .setSource(json)
                 .get();
         print(response);
@@ -48,7 +48,8 @@ public class IndexApp {
     private static void getTwitter()
     {
         Client client=node.client();
-        GetResponse response = client.prepareGet("local", "parallec", "www.parallec.io").get();
+        GetResponse response = client.prepareGet("twitter", "tweet", "1").get();
+//        GetResponse response = client.prepareGet("local", "parallec", "www.parallec.io").get();
         print(response);
         node.close();
     }
