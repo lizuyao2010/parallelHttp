@@ -2,15 +2,18 @@
  * Created by lizuyao2010 on 5/18/16.
  */
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-import io.parallec.core.FilterRegex;
-import io.parallec.core.ParallecResponseHandler;
-import io.parallec.core.ParallelClient;
-import io.parallec.core.ResponseOnSingleTask;
+
+import io.parallec.core.*;
+import io.parallec.core.config.ParallelTaskConfig;
 import io.parallec.core.util.PcDateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
+import org.elasticsearch.action.ListenableActionFuture;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 
 /**
@@ -36,9 +39,9 @@ public class Http3WebAgrregateToElasticSearchMinApp {
         HashMap<String, Object> responseContext = new HashMap<String, Object>();
         responseContext.put("Client", node.client());
 
-        pc.prepareHttpGet("/validateInternals.html")
+        ParallelTask task = pc.prepareHttpGet("/validateInternals.html")
                 .setTargetHostsFromString("www.parallec.io www.jeffpei.com www.restcommander.com")
-                .setResponseContext(responseContext)
+                .setResponseContext(responseContext).setConfig(genConfig())
                 .execute( new ParallecResponseHandler() {
                     public void onCompleted(ResponseOnSingleTask res,
                                             Map<String, Object> responseContext) {
@@ -55,7 +58,21 @@ public class Http3WebAgrregateToElasticSearchMinApp {
                         client.prepareIndex("local", "parallec", res.getHost()).setSource(metricMap).execute();
                     }
                 });
-        node.close(); pc.releaseExternalResources();
+        String res = task.getRequestNumActual()
+                + " Servers in "
+                + task.getDurationSec()
+                + " seconds. Results: "
+                + " Results: "
+                + task.getAggregatedResultHumanStr();
+        System.out.println("Task summary: \n " + res);
+        node.close();
+        pc.releaseExternalResources();
     }
-
+    public static ParallelTaskConfig genConfig() {
+        ParallelTaskConfig config = new ParallelTaskConfig();
+        config.setActorMaxOperationTimeoutSec(20);
+        config.setAutoSaveLogToLocal(true);
+        config.setSaveResponseToTask(true);
+        return config;
+    }
 }
