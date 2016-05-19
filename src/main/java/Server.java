@@ -13,7 +13,6 @@ public class Server {
         Gson gson = new Gson();
         Metrics metrics = new Metrics();
         Map<String,String> cpu=new HashMap<>();
-        Random r = new Random();
         cpu.put("core1","80%");
         cpu.put("core2","33%");
         metrics.setCpu(cpu);
