@@ -31,6 +31,17 @@ public class App {
                     @Override
                     public void onCompleted(ResponseOnSingleTask res,
                                             Map<String, Object> responseContext) {
+                        String jsonStr="{\n" +
+                                "    \"cpu\": {\n" +
+                                "        \"core1\": \"80%\",\n" +
+                                "        \"core2\": \"33%\"\n" +
+                                "    },\n" +
+                                "    \"mem\": {\n" +
+                                "        \"used\": \"1234M\",\n" +
+                                "        \"free\": \"6666M\"\n" +
+                                "    }\n" +
+                                "}";
+
                         String cpu = new FilterRegex(
                                 ".*<td>CPU-Usage-Percent</td>\\s*<td>(.*?)</td>.*")
                                 .filter(res.getResponseContent());
