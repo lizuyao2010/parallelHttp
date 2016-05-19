@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static spark.Spark.*;
 public class Server {
@@ -12,6 +13,7 @@ public class Server {
         Gson gson = new Gson();
         Metrics metrics = new Metrics();
         Map<String,String> cpu=new HashMap<>();
+        Random r = new Random();
         cpu.put("core1","80%");
         cpu.put("core2","33%");
         metrics.setCpu(cpu);

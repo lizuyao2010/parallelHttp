@@ -33,9 +33,7 @@ public class App {
     {
         MetricsDao metricsDao = new MetricsDaoImpl();
         ParallelClient pc = new ParallelClient();
-//        Node node = nodeBuilder().node(); //elastic client initialize
         Map<String, Object> responseContext = new HashMap<String, Object>();
-//        responseContext.put("Client", node.client());
         pc
                 .prepareHttpGet(pattern)
                 .setHttpPort(4567)
@@ -47,11 +45,9 @@ public class App {
                     @Override
                     public void onCompleted(ResponseOnSingleTask res,
                                             Map<String, Object> responseContext) {
-//                        storeData(res, responseContext)
                         metricsDao.storeMetrics(res.getResponseContent(),PcDateUtils.getNowDateTimeStrStandard(), res.getHost());
                     }
                 });
-//        node.close();
         metricsDao.close();
         pc.releaseExternalResources();
     }
@@ -59,7 +55,7 @@ public class App {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Metrics metrics = mapper.readValue(res.getResponseContent(), Metrics.class);
-            Map<String, Object> metricMap = new HashMap<String, Object>();
+            Map<String, Object> metricMap = new HashMap<>();
             metricMap.put("cpu", metrics.getCpu());
             metricMap.put("mem", metrics.getMem());
             metricMap.put("TimeStamp", PcDateUtils.getNowDateTimeStrStandard());
