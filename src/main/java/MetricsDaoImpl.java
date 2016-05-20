@@ -29,6 +29,8 @@ public class MetricsDaoImpl implements MetricsDao {
             metricMap.put("cpu", metrics.getCpu());
             metricMap.put("mem", metrics.getMem());
             metricMap.put("TimeStamp", timestamp);
+            System.out.println("cpu: " + metrics.getCpu() + " mem: " + metrics.getMem()
+                    + " timeStamp: "+metricMap.get("TimeStamp") + " host: " + host);
             client.prepareIndex("metrics", "metric", host).setSource(metricMap).execute();
         } catch (IOException e) {
             e.printStackTrace();

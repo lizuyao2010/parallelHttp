@@ -27,15 +27,15 @@ public class App {
             .getLogger(App.class);
     public static void main(String[] args)
     {
-        query(Arrays.asList("localhost", "www.restcommander.com"),"/metric");
+        query(Arrays.asList("localhost"),"/metric");
     }
-    public static void query(List<String> nodes, String pattern)
+    public static void query(List<String> nodes, String route)
     {
         MetricsDao metricsDao = new MetricsDaoImpl();
         ParallelClient pc = new ParallelClient();
         Map<String, Object> responseContext = new HashMap<String, Object>();
         pc
-                .prepareHttpGet(pattern)
+                .prepareHttpGet(route)
                 .setHttpPort(4567)
                 .setConcurrency(10000)
                 .handleInWorker()
