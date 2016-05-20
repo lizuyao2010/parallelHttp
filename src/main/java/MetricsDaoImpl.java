@@ -14,8 +14,8 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
  * Created by lizuyao2010 on 5/19/16.
  */
 public class MetricsDaoImpl implements MetricsDao {
-    Node node;
-    Client client;
+    private Node node;
+    private Client client;
     public MetricsDaoImpl() {
         node=nodeBuilder().node();
         client=node.client();
