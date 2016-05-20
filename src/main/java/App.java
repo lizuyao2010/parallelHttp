@@ -66,24 +66,23 @@ public class App {
                 .println("Result Brief Summary\n "
                         + PcStringUtils.renderJson(task
                         .getAggregateResultCountSummary()));
-        pc.releaseExternalResources();
         metricsDao.close();
         pc.releaseExternalResources();
     }
-    private static void storeData(ResponseOnSingleTask res, Map<String, Object> responseContext) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            Metrics metrics = mapper.readValue(res.getResponseContent(), Metrics.class);
-            Map<String, Object> metricMap = new HashMap<>();
-            metricMap.put("cpu", metrics.getCpu());
-            metricMap.put("mem", metrics.getMem());
-            metricMap.put("TimeStamp", PcDateUtils.getNowDateTimeStrStandard());
-            logger.info("cpu:" + metrics.getCpu() + " mem: " + metrics.getMem()
-                    + " host: " + res.getHost() + " timeStamp: "+metricMap.get("TimeStamp"));
-            Client client = (Client) responseContext.get("Client");
-            client.prepareIndex("metrics", "metric", res.getHost()).setSource(metricMap).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private static void storeData(ResponseOnSingleTask res, Map<String, Object> responseContext) {
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            Metrics metrics = mapper.readValue(res.getResponseContent(), Metrics.class);
+//            Map<String, Object> metricMap = new HashMap<>();
+//            metricMap.put("cpu", metrics.getCpu());
+//            metricMap.put("mem", metrics.getMem());
+//            metricMap.put("TimeStamp", PcDateUtils.getNowDateTimeStrStandard());
+//            logger.info("cpu:" + metrics.getCpu() + " mem: " + metrics.getMem()
+//                    + " host: " + res.getHost() + " timeStamp: "+metricMap.get("TimeStamp"));
+//            Client client = (Client) responseContext.get("Client");
+//            client.prepareIndex("metrics", "metric", res.getHost()).setSource(metricMap).execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
