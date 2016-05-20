@@ -29,13 +29,13 @@ public class App {
     {
         query(Arrays.asList("localhost"),"/metric");
     }
-    public static void query(List<String> nodes, String route)
+    public static void query(List<String> nodes, String method)
     {
         MetricsDao metricsDao = new MetricsDaoImpl();
         ParallelClient pc = new ParallelClient();
         Map<String, Object> responseContext = new HashMap<String, Object>();
         pc
-                .prepareHttpGet(route)
+                .prepareHttpGet(method)
                 .setHttpPort(4567)
                 .setConcurrency(10000)
                 .handleInWorker()
