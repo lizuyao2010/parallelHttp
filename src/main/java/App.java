@@ -1,13 +1,12 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.parallec.core.FilterRegex;
-import io.parallec.core.ParallecResponseHandler;
-import io.parallec.core.ParallelClient;
-import io.parallec.core.ResponseOnSingleTask;
+import io.parallec.core.*;
 import io.parallec.core.util.PcDateUtils;
+import io.parallec.core.util.PcStringUtils;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.node.Node;
+import org.elasticsearch.node.NodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,20 +26,18 @@ public class App {
             .getLogger(App.class);
     public static void main(String[] args)
     {
-        query(Arrays.asList("localhost"),"/metric");
+        query(Arrays.asList("localhost","192.168.1.110","www.parallec.io"),"/metric");
     }
     public static void query(List<String> nodes, String method)
     {
         MetricsDao metricsDao = new MetricsDaoImpl();
         ParallelClient pc = new ParallelClient();
-        Map<String, Object> responseContext = new HashMap<String, Object>();
-        pc
+        ParallelTask task = pc
                 .prepareHttpGet(method)
+                .async()
                 .setHttpPort(4567)
                 .setConcurrency(10000)
-                .handleInWorker()
                 .setTargetHostsFromList(nodes)
-                .setResponseContext(responseContext)
                 .execute(new ParallecResponseHandler() {
                     @Override
                     public void onCompleted(ResponseOnSingleTask res,
@@ -48,6 +45,28 @@ public class App {
                         metricsDao.storeMetrics(res.getResponseContent(),PcDateUtils.getNowDateTimeStrStandard(), res.getHost());
                     }
                 });
+        while (!task.isCompleted()) {
+            try {
+                Thread.sleep(100L);
+                System.err.println(String.format(
+                        "POLL_JOB_PROGRESS (%.5g%%)  PT jobid: %s",
+                        task.getProgress(), task.getTaskId()));
+                pc.logHealth();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out
+                .println("Result Summary\n "
+                        + PcStringUtils.renderJson(task
+                        .getAggregateResultFullSummary()));
+
+        System.out
+                .println("Result Brief Summary\n "
+                        + PcStringUtils.renderJson(task
+                        .getAggregateResultCountSummary()));
+        pc.releaseExternalResources();
         metricsDao.close();
         pc.releaseExternalResources();
     }
