@@ -36,7 +36,7 @@ public class App {
                 .prepareHttpGet(method)
                 .async()
                 .setHttpPort(4567)
-                .setConcurrency(10000)
+                .setConcurrency(100000)
                 .setTargetHostsFromList(nodes)
                 .execute(new ParallecResponseHandler() {
                     @Override

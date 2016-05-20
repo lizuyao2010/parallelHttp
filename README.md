@@ -1,3 +1,6 @@
+#build project
+mvn package
+
 #start server
 mvn exec:java -Dexec.mainClass="Server"
 
